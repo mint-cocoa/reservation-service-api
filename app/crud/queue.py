@@ -2,8 +2,8 @@ import os
 import redis
 from sqlalchemy.orm import Session
 from app.schemas.queue import QueueCreate
+from app.dependencies import get_db
 
-# Redis 연결 설정
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)

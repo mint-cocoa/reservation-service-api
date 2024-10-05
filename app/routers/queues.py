@@ -2,12 +2,12 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from app.schemas.queue import QueueCreate, QueueResponse
 from app.crud.queue import add_to_queue, remove_from_queue, get_queue
-from app.dependencies import get_db
+from app.utils.redis_client import get_redis_client
 
 router = APIRouter()
 
 @router.post("/", response_model=QueueResponse)
-def enqueue(queue: QueueCreate, db=Depends(get_db)):
+def enqueue(queue: QueueCreate, db=Depends(get_redis_client)):
     try:
         add_to_queue(db, queue.ride_id, queue.user_id)
         return {"message": f"사용자 {queue.user_id}가 {queue.ride_id} 놀이기구의 줄에 추가되었습니다."}
@@ -15,7 +15,7 @@ def enqueue(queue: QueueCreate, db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{ride_id}", response_model=QueueResponse)
-def dequeue(ride_id: str, db=Depends(get_db)):
+def dequeue(ride_id: str, db=Depends(get_redis_client)):
     try:
         user_id = remove_from_queue(db, ride_id)
         if user_id:
@@ -26,7 +26,7 @@ def dequeue(ride_id: str, db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{ride_id}", response_model=List[str])
-def view_queue(ride_id: str, db=Depends(get_db)):
+def view_queue(ride_id: str, db=Depends(get_redis_client)):
     try:
         queue = get_queue(db, ride_id)
         return queue

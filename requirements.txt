@@ -3,3 +3,4 @@ uvicorn
 redis
 pydantic
 sqlalchemy
+psycopg2-binary

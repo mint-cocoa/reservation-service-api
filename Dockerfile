@@ -10,8 +10,10 @@ WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+
+# pip install 명령어가 이미 존재할 것입니다.
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
 # Copy project
 COPY . .

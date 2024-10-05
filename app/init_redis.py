@@ -9,24 +9,18 @@ DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@localhost:5
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def init_redis_with_open_rides(facility_ids=None):
+def init_redis_with_open_rides():
     db = SessionLocal()
     try:
-        if facility_ids:
-            rides = db.query(Ride).filter(Ride.facility_id.in_(facility_ids)).all()
-        else:
-            rides = db.query(Ride).all()  # Or however you fetch rides
-        
-        for ride in rides:
+        # 열린 놀이기구 조회
+        open_rides = db.query(Ride).filter(Ride.is_open == True).all()
+        for ride in open_rides:
             redis_client.hset(f"ride:{ride.id}", mapping={
                 "status": "open",
-                "capacity": ride.capacity,
-                # Add other ride attributes as needed
+                "capacity": ride.max_queue_size,
+                # 필요한 다른 속성 추가
             })
+    except Exception as e:
+        print(f"Error initializing Redis with open rides: {e}")
     finally:
         db.close()
-
-
-
-#if __name__ == "__main__":
-#    init_redis_with_open_rides()
